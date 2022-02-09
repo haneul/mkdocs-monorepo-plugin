@@ -13,10 +13,10 @@
 # limitations under the License.
 
 from tempfile import TemporaryDirectory
-from distutils.dir_util import copy_tree
 
 import logging
 import os
+import shutil
 from os.path import join
 from pathlib import Path
 
@@ -59,7 +59,10 @@ class Merger:
                 dest_dir = os.path.join(self.temp_docs_dir.name, *split_alias)
 
             if os.path.exists(source_dir):
-                copy_tree(source_dir, dest_dir)
+                if os.path.exists(dest_dir):
+                    os.removedirs(dest_dir)
+                # exclude emacs temp file
+                shutil.copytree(source_dir, dest_dir, ignore=shutil.ignore_patterns(".#*"))
                 for file_abs_path in Path(source_dir).rglob('*.md'):
                     file_abs_path = str(file_abs_path)  # python 3.5 compatibility
                     if os.path.isfile(file_abs_path):
